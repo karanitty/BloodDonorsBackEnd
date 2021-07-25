@@ -11,6 +11,7 @@ app.use(express.json());
 
 //Model Declarations
 const userData = require('./src/model/userData');
+const donorData = require('./src/model/donorData');
 
 app.get('/',(req,res)=>{
     res.send('backend successfull');
@@ -126,17 +127,84 @@ function verifyToken(req, res, next) {
     }
     req.userId = payload.subject;
     next();
-  }
+}
 
-  app.get('/user/details/:email',(req,res)=>{
-      const email=req.params.email;
-      console.log(email);
-      userData.findOne({'email':email})
-      .then((user)=>{
-          console.log(user);
-          res.send(user);
-      });
-  });
+//Donor Activities
+//Getting Data from Database
+
+app.get('/user/details/:email',(req,res)=>{
+    const email=req.params.email;
+    console.log(email);
+    userData.findOne({'email':email})
+    .then((user)=>{
+        console.log(user);
+        res.send(user);
+    });
+});
+
+//Getting Donor Details from Database
+
+app.get('/user/get_donors', (req,res)=>{
+    donorData.find()
+    .then(function(donors){
+        console.log(donors);
+        res.send(donors);
+    });
+});
+
+app.get('/user/get_donor/:email',(req,res)=>{
+    const email = req.params.email;
+    console.log(email);
+    donorData.findOne({'email':email})
+    .then((donor)=>{
+        console.log(donor);
+        res.send(donor);
+    });
+});
+
+//Adding Donor to Database
+app.post('/user/add_donor',(req,res)=>{
+    res.header('Access-Control-Allow-Origin','*');
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    var newdonor = {
+        name:req.body.donor.name,
+        email:req.body.donor.email,
+        address:req.body.donor.address,
+        district:req.body.donor.district,
+        blood:req.body.donor.blood,
+        phone:req.body.donor.phone,
+        verified:true
+    }
+    console.log(newdonor);
+    var item = new donorData(newdonor);
+    item.save();
+});
+
+//Editing Donor Details
+app.put('/user/edit_donor',(req,res)=>{
+    var donor = {
+        name:req.body.donor.name,
+        email:req.body.donor.email,
+        address:req.body.donor.address,
+        district:req.body.donor.district,
+        blood:req.body.donor.blood,
+        phone:req.body.donor.phone,
+        verified:true
+    }
+    console.log(donor);
+    id = req.body.donor._id;
+    donorData.findByIdAndUpdate({'_id':id},
+    {
+        $set:{
+            'address':donor.address,
+            'district':donor.district,
+            'blood':donor.blood
+        }
+    })
+    .then(function(){
+        res.send();
+    });
+});
 
 //Port Configuration
 app.listen(3000,()=>{
