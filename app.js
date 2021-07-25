@@ -128,6 +128,16 @@ function verifyToken(req, res, next) {
     next();
   }
 
+  app.get('/user/details/:email',(req,res)=>{
+      const email=req.params.email;
+      console.log(email);
+      userData.findOne({'email':email})
+      .then((user)=>{
+          console.log(user);
+          res.send(user);
+      });
+  });
+
 //Port Configuration
 app.listen(3000,()=>{
     console.log('Listening at port 3000');
