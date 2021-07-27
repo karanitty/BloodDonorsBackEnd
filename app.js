@@ -145,7 +145,7 @@ app.get('/user/details/:email',(req,res)=>{
 //Getting Donor Details from Database
 
 app.get('/user/get_donors', (req,res)=>{
-    donorData.find()
+    donorData.find({'verified':true})
     .then(function(donors){
         console.log(donors);
         res.send(donors);
@@ -153,7 +153,7 @@ app.get('/user/get_donors', (req,res)=>{
 });
 
 app.get('/user/get_donor/:email',(req,res)=>{
-    const email = req.params.email;
+    email = req.params.email;
     console.log(email);
     donorData.findOne({'email':email})
     .then((donor)=>{
@@ -173,7 +173,7 @@ app.post('/user/add_donor',(req,res)=>{
         district:req.body.donor.district,
         blood:req.body.donor.blood,
         phone:req.body.donor.phone,
-        verified:true
+        verified:false
     }
     console.log(newdonor);
     var item = new donorData(newdonor);
@@ -204,6 +204,46 @@ app.put('/user/edit_donor',(req,res)=>{
     .then(function(){
         res.send();
     });
+});
+
+//Deleting Donor Details
+app.delete('/user/delete_donor/:email',(req,res)=>{
+    res.header('Access-Control-Allow-Origin','*');
+    res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    email = req.params.email;
+    console.log(email);
+    donorData.findOneAndDelete({'email':email})
+    .then(function(){
+        console.log('Donor Deleted');
+        res.send();
+    });
+});
+
+//Checking Donor Status
+app.get('/user/not_donor/:email',(req,res)=>{
+    email = req.params.email;
+    console.log(email);
+    notDonor = donorData.findOne({'email':email});
+    if(!notDonor){
+        res.status(200).send(true);
+    }
+    else{
+        res.status(401).send(false);
+    }
+});
+
+app.get('/user/is_donor/:email',(req,res)=>{
+    email = req.params.email;
+    isDonor = donorData.findOne({'email':email,
+                                'verified':true});
+    if(isDonor){
+        // res.status(200).send(true);
+        res.send(true);
+    }
+    else{
+        // res.status(401).send(false);
+        res.send(false);
+    }
 });
 
 //Port Configuration
