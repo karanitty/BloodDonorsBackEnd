@@ -78,6 +78,37 @@ app.post('/login/admin',async (req,res)=>{
     }
 });
 
+// app.post('/login/user', async(req,res)=>{
+//     res.header('Access-Control-Allow-Origin','*');
+//     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+//     console.log(req.body);
+//     var user = {
+//         email:req.body.email,
+//         password:req.body.password
+//     }
+
+//     let userValidate = await userData.findOne({'email':user.email});
+//     console.log(userValidate);
+
+//     if(!userValidate){
+//         console.log("Failed at email verification");
+//         res.status(401).send("Invalid Email ID or Password");
+//     }
+//     else{
+//         if(user.password != userValidate.password){
+//             console.log('Failed at password verification');
+//             res.status(401).send("Invalid Email ID or Password");
+//         }
+//         else{
+//             let payload = {subject:userValidate.email+userValidate.password};
+//             let token = jwt.sign(payload,'secretKey');
+//             let access = userValidate.email;
+//             console.log('Success');
+//             res.status(200).send({token,access});
+//         }
+//     }
+// });
+
 app.post('/login/user', async(req,res)=>{
     res.header('Access-Control-Allow-Origin','*');
     res.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -104,7 +135,15 @@ app.post('/login/user', async(req,res)=>{
             let token = jwt.sign(payload,'secretKey');
             let access = userValidate.email;
             console.log('Success');
-            res.status(200).send({token,access});
+            let donor = '';
+            isDonor = await donorData.findOne({'email':userValidate.email});
+            if(!isDonor){
+                donor = 'no';
+            }
+            else{
+                donor = 'yes';
+            }
+            res.status(200).send({token,access,donor});
         }
     }
 });
@@ -220,31 +259,31 @@ app.delete('/user/delete_donor/:email',(req,res)=>{
 });
 
 //Checking Donor Status
-app.get('/user/not_donor/:email',(req,res)=>{
-    email = req.params.email;
-    console.log(email);
-    notDonor = donorData.findOne({'email':email});
-    if(!notDonor){
-        res.status(200).send(true);
-    }
-    else{
-        res.status(401).send(false);
-    }
-});
+// app.get('/user/not_donor/:email',(req,res)=>{
+//     email = req.params.email;
+//     console.log(email);
+//     notDonor = donorData.findOne({'email':email});
+//     if(!notDonor){
+//         res.status(200).send(true);
+//     }
+//     else{
+//         res.status(401).send(false);
+//     }
+// });
 
-app.get('/user/is_donor/:email',(req,res)=>{
-    email = req.params.email;
-    isDonor = donorData.findOne({'email':email,
-                                'verified':true});
-    if(isDonor){
-        // res.status(200).send(true);
-        res.send(true);
-    }
-    else{
-        // res.status(401).send(false);
-        res.send(false);
-    }
-});
+// app.get('/user/is_donor/:email',(req,res)=>{
+//     email = req.params.email;
+//     isDonor = donorData.findOne({'email':email,
+//                                 'verified':true});
+//     if(isDonor){
+//         // res.status(200).send(true);
+//         res.send(true);
+//     }
+//     else{
+//         // res.status(401).send(false);
+//         res.send(false);
+//     }
+// });
 
 //Port Configuration
 app.listen(3000,()=>{
